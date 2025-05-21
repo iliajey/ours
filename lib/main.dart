@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'referral platform v2.0.1',
+      title: 'referral platform v2.0.2',
       locale: Locale('fa'),
       theme: ThemeData(
         primarySwatch: Colors.blue,

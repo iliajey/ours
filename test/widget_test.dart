@@ -8,9 +8,8 @@
 // ignore_for_file: avoid_relative_lib_imports
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/main.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'flutter_application_2/lib/main.dart';
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
