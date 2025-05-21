@@ -457,6 +457,7 @@
 // }
 
 import 'package:flutter/material.dart';
+import 'package:jalali_table_calendar_plus/jalali_table_calendar_plus.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:shamsi_date/shamsi_date.dart';
 
@@ -547,6 +548,24 @@ class _PersianCalendarPageState extends State<PersianCalendarPage> {
     return patients.where((p) => isSameDay(p.dateTime, day)).toList();
   }
 
+  Map<DateTime, List<Patient>> mapByDate(List<Patient> patients) {
+    Map<DateTime, List<Patient>> events = {};
+
+    for (var patient in patients) {
+      // فقط تاریخ (سال، ماه، روز) رو جدا می‌کنیم، بدون ساعت و دقیقه
+      final dateKey = DateTime(
+          patient.dateTime.year, patient.dateTime.month, patient.dateTime.day);
+
+      if (events.containsKey(dateKey)) {
+        events[dateKey]!.add(patient);
+      } else {
+        events[dateKey] = [patient];
+      }
+    }
+
+    return events;
+  }
+
   // تمام جلسات
   List<Patient> get allPatients => patients;
 
@@ -559,8 +578,8 @@ class _PersianCalendarPageState extends State<PersianCalendarPage> {
   @override
   Widget build(BuildContext context) {
     // ignore: unused_local_variable
-    final patientsForSelectedDay =
-        _selectedDay == null ? [] : _getPatientsForDay(_selectedDay!);
+    // final patientsForSelectedDay =
+    //     _selectedDay == null ? [] : _getPatientsForDay(_selectedDay!);
 
     return Scaffold(
       appBar: AppBar(
@@ -568,104 +587,9 @@ class _PersianCalendarPageState extends State<PersianCalendarPage> {
         centerTitle: true,
       ),
       body: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // سمت چپ: تقویم
-          Expanded(
-            flex: 2,
-            child: Padding(
-              padding: EdgeInsets.all(8),
-              child: TableCalendar<Patient>(
-                firstDay: DateTime.utc(2020, 1, 1),
-                lastDay: DateTime.utc(2030, 12, 31),
-                focusedDay: _focusedDay,
-                selectedDayPredicate: (day) => isSameDay(day, _selectedDay),
-                onDaySelected: (selectedDay, focusedDay) {
-                  setState(() {
-                    _selectedDay = selectedDay;
-                    _focusedDay = focusedDay;
-                  });
-                },
-                calendarFormat: CalendarFormat.month,
-                eventLoader: _getPatientsForDay,
-                headerStyle: HeaderStyle(
-                  formatButtonVisible: false,
-                  titleCentered: true,
-                  titleTextFormatter: (date, locale) {
-                    final f = Jalali.fromDateTime(date);
-                    return '${f.year} / ${f.month.toString().padLeft(2, '0')}';
-                  },
-                ),
-                calendarBuilders: CalendarBuilders(
-                  dowBuilder: (context, day) {
-                    final weekdays = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
-                    // ignore: unused_local_variable
-                    final f = Jalali.fromDateTime(day);
-                    return Center(
-                      child: Text(
-                        weekdays[day.weekday % 7],
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    );
-                  },
-                  defaultBuilder: (context, day, focusedDay) {
-                    final f = Jalali.fromDateTime(day);
-                    return Center(child: Text(f.day.toString()));
-                  },
-                  todayBuilder: (context, day, focusedDay) {
-                    final f = Jalali.fromDateTime(day);
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: Colors.blueAccent.withOpacity(0.5),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: Text(
-                          f.day.toString(),
-                          style: TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    );
-                  },
-                  selectedBuilder: (context, day, focusedDay) {
-                    final f = Jalali.fromDateTime(day);
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: Colors.blueAccent,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: Text(
-                          f.day.toString(),
-                          style: TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    );
-                  },
-                  markerBuilder: (context, date, patients) {
-                    if (patients.isNotEmpty) {
-                      return Positioned(
-                        bottom: 4,
-                        right: 4,
-                        child: Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: Colors.redAccent,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      );
-                    }
-                    return null;
-                  },
-                ),
-              ),
-            ),
-          ),
-
-          // سمت راست: لیست تمام جلسات
           Expanded(
             flex: 3,
             child: Padding(
@@ -711,16 +635,53 @@ class _PersianCalendarPageState extends State<PersianCalendarPage> {
                       ),
                       onTap: () {
                         // با کلیک روی جلسه، تاریخش رو انتخاب کن و هایلایت کن
-                        setState(() {
-                          _selectedDay = p.dateTime;
-                          _focusedDay = p.dateTime;
-                        });
+                        // setState(() {
+                        //   _selectedDay = p.dateTime;
+                        //   _focusedDay = p.dateTime;
+                        // });
                       },
                     ),
                   );
                 },
               ),
             ),
+          ),
+
+          // سمت راست: لیست تمام جلسات
+          Expanded(
+            flex: 2,
+            child: Padding(
+                padding: EdgeInsets.all(10),
+                child: JalaliTableCalendar(
+                  customHolyDays: [],
+                  direction: TextDirection.rtl,
+                  initialDate: DateTime.utc(2025, 5, 18),
+                  range: false,
+                  useOfficialHolyDays: true,
+                  option: JalaliTableCalendarOption(),
+                  events: mapByDate(patients),
+                  onDaySelected: (day) {
+                    setState(() {
+                      _selectedDay = day;
+                    });
+                  },
+                  marker: (date, event) {
+                    //
+                    // print(event[0].runtimeType);
+
+                    if (event.isNotEmpty) {
+                      return Positioned(
+                          top: -2,
+                          left: 1,
+                          child: Container(
+                              padding: const EdgeInsets.all(5),
+                              decoration: const BoxDecoration(
+                                  shape: BoxShape.circle, color: Colors.blue),
+                              child: Text(event[0].last.length.toString())));
+                    }
+                    return null;
+                  },
+                )),
           ),
         ],
       ),

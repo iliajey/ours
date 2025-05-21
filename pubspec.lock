@@ -168,6 +168,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "0.20.2"
+  jalali_table_calendar_plus:
+    dependency: "direct main"
+    description:
+      name: jalali_table_calendar_plus
+      sha256: ce572963d0ac8e04444608f184fe2db301ef009d210985053f906b3e3df68e12
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "1.1.3"
   leak_tracker:
     dependency: transitive
     description:
